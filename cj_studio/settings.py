@@ -19,6 +19,7 @@ ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').sp
 CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:8000',
     'http://localhost:8000',
+    "https://cj-web-design-studio.netlify.app",
 ]
 
 # ── INSTALLED APPS ────────────────────────────────────────────────────────
@@ -31,10 +32,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'quotes',
+    'corsheaders',
 ]
 
 # ── MIDDLEWARE ────────────────────────────────────────────────────────────
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -163,3 +166,7 @@ LOGGING = {
         },
     },
 }
+# ── CORS ────────────────────────────────────────────────────────────────
+CORS_ALLOWED_ORIGINS = [
+    "https://cj-web-design-studio.netlify.app",
+]
