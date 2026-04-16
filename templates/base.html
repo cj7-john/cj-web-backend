@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}CJ Web Studio{% endblock %}</title>
+
+  <!-- Google Fonts — same as your frontend -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ══════════════════════════════════════════════
+       CJ Web Studio — Backend Design Tokens
+       Matches the frontend exactly:
+       dark navy + blue-violet glassmorphism
+    ══════════════════════════════════════════════ */
+    :root {
+      --bg-primary:    hsl(228, 32%, 7%);
+      --bg-secondary:  hsl(228, 28%, 9%);
+      --bg-surface:    hsl(228, 24%, 15%);
+      --bg-surface2:   hsl(228, 22%, 19%);
+      --glass-bg:      hsla(228, 30%, 18%, 0.55);
+      --glass-border:  hsla(255, 60%, 80%, 0.12);
+      --glass-border2: hsla(225, 80%, 70%, 0.2);
+      --text-primary:  hsl(0, 0%, 100%);
+      --text-secondary:hsl(220, 20%, 74%);
+      --text-muted:    hsl(220, 15%, 50%);
+      --blue:          hsl(225, 80%, 56%);
+      --blue-light:    hsl(220, 90%, 72%);
+      --violet:        hsl(263, 70%, 60%);
+      --green:         hsl(155, 70%, 45%);
+      --amber:         hsl(38, 92%, 50%);
+      --rose:          hsl(330, 81%, 60%);
+      --cyan:          hsl(199, 89%, 48%);
+      --border:        hsl(228, 18%, 20%);
+      --gradient-brand: linear-gradient(135deg, var(--blue), var(--violet));
+      --gradient-text:  linear-gradient(135deg, var(--blue-light), var(--violet));
+      --font-heading:  'Syne', sans-serif;
+      --font-body:     'DM Sans', sans-serif;
+      --radius-md:     0.75rem;
+      --radius-lg:     1.25rem;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-primary);
+      color: var(--text-secondary);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.6;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: var(--bg-primary); }
+    ::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 2px; }
+
+    /* ── Navbar ── */
+    .navbar {
+      position: sticky; top: 0; z-index: 100;
+      background: hsla(228, 32%, 7%, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 1rem 0;
+    }
+    .navbar__inner {
+      max-width: 1100px; margin: 0 auto;
+      padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .navbar__logo {
+      font-family: var(--font-heading);
+      font-size: 1.1rem; font-weight: 800;
+      color: var(--text-primary);
+      text-decoration: none; display: flex; align-items: center; gap: 0.6rem;
+    }
+    .navbar__logo-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: var(--gradient-brand);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem; font-weight: 800; color: #fff;
+    }
+    .gradient-text {
+      background: var(--gradient-text);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .navbar__links { display: flex; gap: 2rem; list-style: none; }
+    .navbar__links a {
+      font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .navbar__links a:hover { color: var(--text-primary); }
+
+    /* ── Main container ── */
+    .main { max-width: 1100px; margin: 0 auto; padding: 3rem 2rem; }
+
+    /* ── Page heading ── */
+    .page-title {
+      font-family: var(--font-heading);
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 800; color: var(--text-primary);
+      letter-spacing: -0.03em; margin-bottom: 0.5rem;
+    }
+    .page-subtitle {
+      font-size: 0.95rem; color: var(--text-muted); margin-bottom: 2.5rem;
+    }
+    .eyebrow {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--blue-light);
+      display: block; margin-bottom: 0.5rem;
+    }
+
+    /* ── Glass card ── */
+    .glass-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(20px);
+      padding: 2rem;
+    }
+
+    /* ── Form elements ── */
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label {
+      display: block; margin-bottom: 0.4rem;
+      font-size: 0.8rem; font-weight: 600;
+      color: var(--text-secondary); letter-spacing: 0.02em;
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      background: hsla(228, 30%, 22%, 0.6);
+      border: 1px solid var(--glass-border2);
+      border-radius: 0.625rem;
+      padding: 0.75rem 1rem;
+      color: var(--text-primary);
+      font-family: var(--font-body); font-size: 0.9rem;
+      transition: border-color 0.25s, box-shadow 0.25s;
+      outline: none;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px hsla(225, 80%, 56%, 0.15);
+    }
+    .form-input::placeholder, .form-textarea::placeholder {
+      color: var(--text-muted);
+    }
+    .form-select option {
+      background: hsl(228, 28%, 14%); color: var(--text-primary);
+    }
+    .form-textarea { resize: vertical; min-height: 120px; }
+
+    /* ── Error messages ── */
+    .form-errors {
+      background: hsla(330, 81%, 60%, 0.1);
+      border: 1px solid hsla(330, 81%, 60%, 0.25);
+      border-radius: 0.5rem; padding: 0.75rem 1rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.82rem; color: var(--rose);
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-family: var(--font-heading); font-weight: 700;
+      font-size: 0.9rem; border-radius: 9999px;
+      padding: 0.85rem 2rem; cursor: pointer;
+      border: none; transition: all 0.3s var(--ease-out-expo);
+      text-decoration: none; letter-spacing: 0.01em;
+    }
+    .btn--primary {
+      background: var(--gradient-brand); color: #fff;
+      box-shadow: 0 4px 20px hsla(225, 80%, 56%, 0.35);
+    }
+    .btn--primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 40px hsla(225, 80%, 56%, 0.55);
+    }
+    .btn--ghost {
+      background: var(--glass-bg); color: var(--text-primary);
+      border: 1px solid var(--glass-border2);
+    }
+    .btn--ghost:hover {
+      background: hsla(228, 30%, 25%, 0.7);
+      border-color: hsla(225, 80%, 70%, 0.35);
+    }
+
+    /* ── Status badges ── */
+    .badge {
+      display: inline-block; padding: 0.2rem 0.7rem;
+      border-radius: 9999px; font-size: 0.65rem;
+      font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    }
+    .badge--new         { background: hsla(225,80%,56%,0.15); color: var(--blue-light); border: 1px solid hsla(225,80%,56%,0.3); }
+    .badge--contacted   { background: hsla(38,92%,50%,0.15);  color: var(--amber);      border: 1px solid hsla(38,92%,50%,0.3); }
+    .badge--briefed     { background: hsla(199,89%,48%,0.15); color: var(--cyan);       border: 1px solid hsla(199,89%,48%,0.3); }
+    .badge--in_progress { background: hsla(263,70%,60%,0.15); color: var(--violet);     border: 1px solid hsla(263,70%,60%,0.3); }
+    .badge--revision    { background: hsla(330,81%,60%,0.15); color: var(--rose);       border: 1px solid hsla(330,81%,60%,0.3); }
+    .badge--completed   { background: hsla(155,70%,45%,0.15); color: var(--green);      border: 1px solid hsla(155,70%,45%,0.3); }
+    .badge--cancelled   { background: hsla(0,0%,55%,0.12);    color: var(--text-muted); border: 1px solid hsla(0,0%,55%,0.2); }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; border-radius: var(--radius-md); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    thead th {
+      background: hsla(228, 30%, 14%, 0.8);
+      color: var(--text-muted); font-size: 0.65rem;
+      font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 0.75rem 1rem; text-align: left;
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    tbody tr:hover { background: hsla(228, 30%, 18%, 0.5); }
+    tbody td { padding: 0.85rem 1rem; color: var(--text-secondary); vertical-align: middle; }
+    tbody td strong { color: var(--text-primary); font-weight: 500; }
+
+    /* ── Stat cards ── */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; }
+    .stat-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.5rem;
+      text-align: center;
+    }
+    .stat-card__val {
+      font-family: var(--font-heading);
+      font-size: 2rem; font-weight: 800;
+      background: var(--gradient-text);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+    .stat-card__label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-top: 0.35rem; }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 4rem; padding: 2rem;
+      border-top: 1px solid var(--glass-border);
+      text-align: center; font-size: 0.75rem; color: var(--text-muted);
+    }
+
+    /* ── Django messages (alerts) ── */
+    .messages { list-style: none; margin-bottom: 1.5rem; }
+    .messages li {
+      padding: 0.75rem 1rem; border-radius: 0.5rem;
+      font-size: 0.85rem; margin-bottom: 0.5rem;
+    }
+    .messages li.success { background: hsla(155,70%,45%,0.12); border: 1px solid hsla(155,70%,45%,0.3); color: var(--green); }
+    .messages li.error   { background: hsla(330,81%,60%,0.12); border: 1px solid hsla(330,81%,60%,0.3); color: var(--rose);  }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .main { padding: 2rem 1rem; }
+      .navbar__links { display: none; }
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar__inner">
+      <a href="/" class="navbar__logo">
+        <div class="navbar__logo-icon">CJ</div>
+        CJ <span class="gradient-text" style="-webkit-text-fill-color:transparent">Web Studio</span>
+      </a>
+      <ul class="navbar__links">
+        <li><a href="/">Get a Quote</a></li>
+        <li><a href="/dashboard/">Dashboard</a></li>
+        <li><a href="/admin/">Admin Panel</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Django flash messages -->
+  {% if messages %}
+    <div class="main" style="padding-bottom:0">
+      <ul class="messages">
+        {% for message in messages %}
+          <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <main class="main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    &copy; 2025 CJ Web Studio · Built by John Buhendwa · Durban, South Africa 🇿🇦
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Got your brief — {{ agency.name }}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#080c1a;font-family:'Segoe UI',Arial,sans-serif;color:#94a3b8;padding:2rem 1rem}
+    .card{max-width:560px;margin:0 auto;background:#0f1629;border-radius:16px;overflow:hidden;border:1px solid #1e2740}
+    .top{background:linear-gradient(135deg,hsl(225,80%,45%) 0%,hsl(263,70%,50%) 100%);padding:2.5rem;text-align:center}
+    .top h1{color:#fff;font-size:1.25rem;font-weight:800;letter-spacing:-0.01em}
+    .top p{color:rgba(255,255,255,0.75);font-size:0.875rem;margin-top:0.4rem}
+    .body{padding:2.25rem 2.5rem}
+    p.intro{font-size:0.9rem;line-height:1.75;color:#cbd5e1;margin-bottom:1.5rem}
+    .ref-box{background:#080c1a;border:1px solid #1e2740;border-radius:10px;padding:1.25rem;text-align:center;margin-bottom:1.75rem}
+    .ref-box .lbl{font-size:0.62rem;text-transform:uppercase;letter-spacing:0.12em;color:#475569;margin-bottom:0.35rem}
+    .ref-box .ref{font-family:'Courier New',monospace;font-size:1.2rem;font-weight:700;color:#a5b4fc;letter-spacing:0.06em}
+    .ref-box .sub{font-size:0.72rem;color:#334155;margin-top:0.35rem}
+    .summary{background:#080c1a;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.75rem}
+    .summary-row{display:flex;justify-content:space-between;padding:0.45rem 0;border-bottom:1px solid #1e2740;font-size:0.83rem}
+    .summary-row:last-child{border-bottom:none}
+    .summary-row span:first-child{color:#475569}
+    .summary-row span:last-child{color:#e2e8f0;font-weight:500}
+    .next-title{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:#334155;margin-bottom:1rem;font-weight:600}
+    .step{display:flex;align-items:flex-start;gap:0.875rem;margin-bottom:0.875rem}
+    .step-num{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,hsl(225,80%,50%),hsl(263,70%,55%));color:#fff;font-size:0.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:0.05rem}
+    .step-text strong{display:block;font-size:0.85rem;color:#e2e8f0;margin-bottom:0.1rem}
+    .step-text span{font-size:0.78rem;color:#475569}
+    .divider{border:none;border-top:1px solid #1e2740;margin:1.5rem 0}
+    .cta-row{display:flex;flex-direction:column;align-items:center;gap:0.75rem;padding-bottom:0.5rem}
+    .btn-primary{display:inline-block;background:linear-gradient(135deg,hsl(225,80%,50%),hsl(263,70%,55%));color:#fff;font-size:0.85rem;font-weight:700;padding:0.8rem 2.25rem;border-radius:999px;text-decoration:none;text-align:center}
+    .btn-ghost{display:inline-block;color:#7dd3fc;font-size:0.8rem;font-weight:500;padding:0.6rem 1.5rem;border:1px solid rgba(125,211,252,0.25);border-radius:999px;text-decoration:none;text-align:center}
+    .note{text-align:center;font-size:0.75rem;color:#334155;margin-top:1rem}
+    .foot{background:#080c1a;padding:1.25rem 2.5rem;border-top:1px solid #1e2740;text-align:center;font-size:0.72rem;color:#334155;line-height:1.9}
+    .foot strong{color:#475569}
+  </style>
+</head>
+<body>
+<div class="card">
+
+  <div class="top">
+    <div style="font-size:2rem;margin-bottom:0.75rem">👋</div>
+    <h1>Got your brief, {{ quote.name|truncatewords:1 }}!</h1>
+    <p>We'll be in touch within 24 hours.</p>
+  </div>
+
+  <div class="body">
+    <p class="intro">
+      Thanks for reaching out to <strong style="color:#e2e8f0">{{ agency.name }}</strong>.
+      John has been notified and will personally review your brief. 
+      You can expect a reply with a quote and timeline within 24 hours — often sooner.
+    </p>
+
+    <!-- Reference -->
+    <div class="ref-box">
+      <div class="lbl">Your Reference Number</div>
+      <div class="ref">{{ quote.reference }}</div>
+      <div class="sub">Keep this — you'll need it if you contact us about this project</div>
+    </div>
+
+    <!-- What they submitted -->
+    <div class="summary">
+      <div class="summary-row">
+        <span>Project type</span>
+        <span>{{ quote.get_project_type_display }}</span>
+      </div>
+      {% if quote.budget %}
+      <div class="summary-row">
+        <span>Budget</span>
+        <span>{{ quote.get_budget_display }}</span>
+      </div>
+      {% endif %}
+      {% if quote.business_name %}
+      <div class="summary-row">
+        <span>Business</span>
+        <span>{{ quote.business_name }}</span>
+      </div>
+      {% endif %}
+      <div class="summary-row">
+        <span>Submitted</span>
+        <span>{{ quote.created_at|date:"d M Y" }}</span>
+      </div>
+    </div>
+
+    <!-- Next steps -->
+    <div class="next-title">What happens next</div>
+
+    <div class="step">
+      <div class="step-num">✓</div>
+      <div class="step-text">
+        <strong>Brief received</strong>
+        <span>You're in — we have everything we need</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">
+        <strong>John reviews and replies</strong>
+        <span>Within 24 hours — you'll get a quote, timeline, and exact price</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">
+        <strong>50% deposit locks in your spot</strong>
+        <span>EFT transfer — we start building once payment clears, balance due on completion</span>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="cta-row">
+      <a href="mailto:{{ agency.email }}" class="btn-primary">Reply to this email</a>
+      <a href="https://wa.me/27817957533" class="btn-ghost">💬 WhatsApp us instead</a>
+    </div>
+
+    <p class="note">Need it urgently? WhatsApp is the fastest way to reach us.</p>
+  </div>
+
+  <div class="foot">
+    <strong>{{ agency.name }}</strong><br>
+    {{ agency.email }} · {{ agency.phone }}<br>
+    {{ agency.location }}
+  </div>
+
+</div>
+</body>
+</html>

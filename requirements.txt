@@ -1,0 +1,13 @@
+# CJ Web Studio — Python dependencies
+# Install: pip install -r requirements.txt
+
+Django>=4.2,<5.0
+
+# Optional — PDF invoice generation (requires GTK on Windows)
+# weasyprint>=60.0
+
+# Optional — PostgreSQL for production
+# psycopg2-binary>=2.9
+
+# Optional — serve static files without nginx
+# whitenoise>=6.6
