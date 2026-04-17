@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Start a Project — CJ Web Studio{% endblock %}
+{% block meta_description %}Tell us about your project. CJ Web Studio builds premium websites and web apps for South African businesses. Based in Durban.{% endblock %}
+
+{% block content %}
+
+<!-- PAGE HERO -->
+<section class="page-hero">
+  <div class="page-hero__grid-bg"></div>
+  <div class="page-hero__orb"></div>
+  <div class="page-hero__overlay" style="background:linear-gradient(to bottom,hsla(228,32%,7%,0.55) 0%,hsla(228,32%,7%,0.98) 100%)"></div>
+  <div class="page-hero__content">
+    <span class="eyebrow">Get in Touch</span>
+    <h1>Let's Start <span class="gradient-text">Your Project</span></h1>
+    <p>Fill in the brief below. John will reply within 24 hours with a quote and timeline — no obligations.</p>
+  </div>
+</section>
+
+<!-- CONTACT SECTION -->
+<section class="section section--bg3">
+  <div class="container container--mid">
+
+    <!-- Contact strip -->
+    <div class="grid grid--3" style="margin-bottom:3rem">
+      <a href="mailto:{{ agency.email }}" class="contact-info-card reveal">
+        <div style="font-size:1.5rem;margin-bottom:0.6rem">📧</div>
+        <div style="font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:0.3rem">Email</div>
+        <div style="font-size:0.875rem;font-weight:600;color:var(--text-primary)">{{ agency.email }}</div>
+      </a>
+      <a href="https://wa.me/27817957533" target="_blank" rel="noopener" class="contact-info-card reveal" data-delay="1">
+        <div style="font-size:1.5rem;margin-bottom:0.6rem">📱</div>
+        <div style="font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:0.3rem">WhatsApp</div>
+        <div style="font-size:0.875rem;font-weight:600;color:var(--text-primary)">{{ agency.phone }}</div>
+      </a>
+      <div class="contact-info-card reveal" data-delay="2">
+        <div style="font-size:1.5rem;margin-bottom:0.6rem">📍</div>
+        <div style="font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:0.3rem">Location</div>
+        <div style="font-size:0.875rem;font-weight:600;color:var(--text-primary)">{{ agency.location }}</div>
+      </div>
+    </div>
+
+    <!-- Non-field errors -->
+    {% if form.non_field_errors %}
+      <div style="background:hsla(0,70%,60%,0.1);border:1px solid hsla(0,70%,60%,0.3);border-radius:0.75rem;padding:1rem 1.5rem;margin-bottom:1.5rem">
+        {% for err in form.non_field_errors %}
+          <p style="color:hsl(0,70%,70%);font-size:0.875rem">⚠️ {{ err }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <!-- THE FORM — action MUST point to Django, not the static HTML file -->
+    <div class="glass-card" style="padding:2.5rem">
+      <div style="margin-bottom:2rem">
+        <span class="eyebrow">Project Brief</span>
+        <h2 style="font-size:1.4rem;font-weight:700;letter-spacing:-0.02em;margin-top:0.25rem;color:var(--text-primary)">
+          Tell us what you're building
+        </h2>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-top:0.4rem">
+          The more detail you give us, the more accurate the quote.
+        </p>
+      </div>
+
+      {# action="{% url 'quote_request' %}" is the key fix —
+         this submits to Django, not a static HTML file #}
+      <form method="POST" action="{% url 'quote_request' %}" novalidate id="quoteForm">
+        {% csrf_token %}
+
+        <!-- Row 1: Name + Email -->
+        <div class="form-row-2" style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem">
+          <div>
+            <label class="form-label" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+            {{ form.name }}
+            {% if form.name.errors %}<p class="form-error">{{ form.name.errors.0 }}</p>{% endif %}
+          </div>
+          <div>
+            <label class="form-label" for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+            {{ form.email }}
+            {% if form.email.errors %}<p class="form-error">{{ form.email.errors.0 }}</p>{% endif %}
+          </div>
+        </div>
+
+        <!-- Row 2: Phone + Business -->
+        <div class="form-row-2" style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem">
+          <div>
+            <label class="form-label" for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
+            {{ form.phone }}
+            {% if form.phone.errors %}<p class="form-error">{{ form.phone.errors.0 }}</p>{% endif %}
+          </div>
+          <div>
+            <label class="form-label" for="{{ form.business_name.id_for_label }}">{{ form.business_name.label }}</label>
+            {{ form.business_name }}
+          </div>
+        </div>
+
+        <!-- Row 3: Project Type + Budget -->
+        <div class="form-row-2" style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem">
+          <div>
+            <label class="form-label" for="{{ form.project_type.id_for_label }}">{{ form.project_type.label }}</label>
+            {{ form.project_type }}
+            {% if form.project_type.errors %}<p class="form-error">{{ form.project_type.errors.0 }}</p>{% endif %}
+          </div>
+          <div>
+            <label class="form-label" for="{{ form.budget.id_for_label }}">{{ form.budget.label }}</label>
+            {{ form.budget }}
+          </div>
+        </div>
+
+        <!-- Message -->
+        <div style="margin-bottom:1.75rem">
+          <label class="form-label" for="{{ form.message.id_for_label }}">{{ form.message.label }}</label>
+          {{ form.message }}
+          {% if form.message.errors %}<p class="form-error">{{ form.message.errors.0 }}</p>{% endif %}
+        </div>
+
+        <!-- Submit -->
+        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+          <button type="submit" class="btn btn--primary" id="submitBtn">
+            Send Project Brief
+            <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+          </button>
+          <a href="https://wa.me/27817957533" target="_blank" rel="noopener" class="btn btn--ghost btn--sm">
+            Chat on WhatsApp instead
+          </a>
+        </div>
+        <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.75rem">
+          No spam, no obligations. We reply within 24 hours.
+        </p>
+      </form>
+    </div>
+
+    <!-- Process steps below form -->
+    <div class="grid grid--3" style="margin-top:2rem">
+      <div class="payment-step reveal">
+        <div class="payment-step__num">1</div>
+        <h4 style="font-family:var(--font-heading);font-size:0.875rem;font-weight:700;color:var(--text-primary);margin-bottom:0.35rem">Send your brief</h4>
+        <p style="font-size:0.8rem;color:var(--text-secondary)">Fill the form above — takes about 2 minutes</p>
+      </div>
+      <div class="payment-step reveal" data-delay="1">
+        <div class="payment-step__num">2</div>
+        <h4 style="font-family:var(--font-heading);font-size:0.875rem;font-weight:700;color:var(--text-primary);margin-bottom:0.35rem">We reply within 24hrs</h4>
+        <p style="font-size:0.8rem;color:var(--text-secondary)">You get a quote, timeline, and exact price</p>
+      </div>
+      <div class="payment-step reveal" data-delay="2">
+        <div class="payment-step__num">3</div>
+        <h4 style="font-family:var(--font-heading);font-size:0.875rem;font-weight:700;color:var(--text-primary);margin-bottom:0.35rem">50% deposit starts the build</h4>
+        <p style="font-size:0.8rem;color:var(--text-secondary)">EFT transfer — balance on completion</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<style>
+  .form-label {
+    display:block; font-size:0.72rem; font-weight:700;
+    letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--text-muted); margin-bottom:0.4rem;
+  }
+  .form-error {
+    color:hsl(0,70%,65%); font-size:0.78rem;
+    margin-top:0.3rem; font-family:var(--font-body);
+  }
+  @media (max-width:640px) {
+    .form-row-2 { grid-template-columns:1fr !important; }
+  }
+</style>
+<script>
+  document.getElementById('quoteForm').addEventListener('submit', function() {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = 'Sending… <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>';
+  });
+</script>
+{% endblock %}

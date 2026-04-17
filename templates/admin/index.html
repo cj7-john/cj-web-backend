@@ -1,0 +1,307 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}Dashboard — CJ Web Studio{% endblock %}
+
+{% block content %}
+<style>
+  /* ── Dashboard layout ── */
+  .dash { max-width: 1100px; margin: 0 auto; }
+  .dash-title {
+    font-size: 1.4rem; font-weight: 700; color: #f8fafc;
+    margin: 0 0 0.35rem; letter-spacing: -0.02em;
+  }
+  .dash-sub { font-size: 0.82rem; color: #475569; margin-bottom: 2rem; }
+
+  /* ── Stat cards row ── */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .stat {
+    background: #0f172a;
+    border: 1px solid #1e2740;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, hsl(225,80%,56%), hsl(263,70%,60%));
+    border-radius: 2px 2px 0 0;
+  }
+  .stat__val {
+    font-size: 2rem; font-weight: 800;
+    background: linear-gradient(135deg, hsl(220,90%,72%), hsl(263,65%,72%));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1; margin-bottom: 0.4rem;
+  }
+  .stat__label {
+    font-size: 0.65rem; text-transform: uppercase;
+    letter-spacing: 0.1em; color: #475569; font-weight: 600;
+  }
+
+  /* ── Chart cards ── */
+  .chart-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  @media (max-width: 900px) { .chart-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 640px) { .chart-grid { grid-template-columns: 1fr; } }
+
+  .chart-card {
+    background: #0f172a;
+    border: 1px solid #1e2740;
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+  .chart-card h3 {
+    font-size: 0.72rem; text-transform: uppercase;
+    letter-spacing: 0.1em; color: #475569;
+    margin-bottom: 1.25rem; font-weight: 600;
+  }
+  .chart-wrap { position: relative; height: 180px; }
+
+  /* ── Recent quotes table ── */
+  .recent-card {
+    background: #0f172a;
+    border: 1px solid #1e2740;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+  .recent-card__head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #1e2740;
+  }
+  .recent-card__head h3 { font-size: 0.875rem; font-weight: 600; color: #e2e8f0; }
+  .recent-card__head a {
+    font-size: 0.75rem; color: #7dd3fc;
+    background: rgba(125,211,252,0.08);
+    border: 1px solid rgba(125,211,252,0.2);
+    border-radius: 999px; padding: 0.3rem 0.9rem;
+    text-decoration: none;
+  }
+  table.dash-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .dash-table th {
+    font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em;
+    color: #334155; padding: 0.7rem 1.25rem; text-align: left;
+    border-bottom: 1px solid #1e2740; font-weight: 600;
+  }
+  .dash-table td { padding: 0.85rem 1.25rem; border-bottom: 1px solid #0e1728; vertical-align: middle; }
+  .dash-table tbody tr:last-child td { border-bottom: none; }
+  .dash-table tbody tr:hover td { background: rgba(255,255,255,0.02); }
+  .dash-table td strong { color: #e2e8f0; font-weight: 500; }
+  .dash-table td .sub { font-size: 0.72rem; color: #334155; margin-top: 0.1rem; }
+
+  /* Status pills */
+  .pill {
+    display: inline-block; padding: 0.18rem 0.75rem;
+    border-radius: 999px; font-size: 0.65rem; font-weight: 700;
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .pill-new         { background: hsla(225,80%,56%,0.15); color: hsl(220,90%,72%); }
+  .pill-contacted   { background: hsla(38,92%,50%,0.15);  color: hsl(38,90%,68%); }
+  .pill-briefed     { background: hsla(199,89%,48%,0.15); color: hsl(199,89%,68%); }
+  .pill-in_progress { background: hsla(263,70%,60%,0.15); color: hsl(263,65%,75%); }
+  .pill-completed   { background: hsla(155,70%,45%,0.15); color: hsl(155,65%,60%); }
+  .pill-cancelled   { background: rgba(100,100,100,0.15); color: #64748b; }
+  .pill-revision    { background: hsla(330,81%,60%,0.15); color: hsl(330,81%,75%); }
+</style>
+
+<div class="dash">
+  <h1 class="dash-title">Client Pipeline</h1>
+  <p class="dash-sub">Overview of leads, projects and activity — {{ agency.name }}</p>
+
+  <!-- ── Stats row ── -->
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat__val">{{ total_quotes }}</div>
+      <div class="stat__label">Total Quotes</div>
+    </div>
+    <div class="stat">
+      <div class="stat__val" style="-webkit-text-fill-color:hsl(220,90%,72%);color:hsl(220,90%,72%)">{{ new_quotes }}</div>
+      <div class="stat__label">New</div>
+    </div>
+    <div class="stat">
+      <div class="stat__val" style="-webkit-text-fill-color:hsl(38,90%,68%);color:hsl(38,90%,68%)">{{ contacted_quotes }}</div>
+      <div class="stat__label">Contacted</div>
+    </div>
+    <div class="stat">
+      <div class="stat__val" style="-webkit-text-fill-color:hsl(263,65%,75%);color:hsl(263,65%,75%)">{{ in_progress_quotes }}</div>
+      <div class="stat__label">In Progress</div>
+    </div>
+    <div class="stat">
+      <div class="stat__val" style="-webkit-text-fill-color:hsl(155,65%,60%);color:hsl(155,65%,60%)">{{ completed_quotes }}</div>
+      <div class="stat__label">Completed</div>
+    </div>
+  </div>
+
+  <!-- ── Charts ── -->
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3>Quote Requests — Last 6 Months</h3>
+      <div class="chart-wrap"><canvas id="lineChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>By Budget Range</h3>
+      <div class="chart-wrap"><canvas id="budgetChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>By Project Type</h3>
+      <div class="chart-wrap"><canvas id="typeChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ── Recent quotes table ── -->
+  <div class="recent-card">
+    <div class="recent-card__head">
+      <h3>Recent Quote Requests</h3>
+      <a href="{% url 'admin:quotes_quoterequest_changelist' %}">View all →</a>
+    </div>
+    <table class="dash-table">
+      <thead>
+        <tr>
+          <th>Client</th>
+          <th>Project</th>
+          <th>Budget</th>
+          <th>Status</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for q in recent_quotes %}
+        <tr>
+          <td>
+            <strong>{{ q.name }}</strong>
+            <div class="sub">{{ q.email }}</div>
+          </td>
+          <td style="color:#94a3b8">{{ q.get_project_type_display }}</td>
+          <td style="color:#94a3b8">{{ q.get_budget_display|default:"—" }}</td>
+          <td><span class="pill pill-{{ q.status }}">{{ q.get_status_display }}</span></td>
+          <td style="color:#475569">{{ q.created_at|date:"d M Y" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" style="text-align:center;padding:2.5rem;color:#334155">
+            No quote requests yet. Share your contact page link to start receiving leads.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div><!-- /dash -->
+
+<!-- Chart.js — loaded from CDN, no animation on scroll issues -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+  // Data passed from the view
+  var quoteLabels  = {{ quote_labels|safe }};
+  var quoteCounts  = {{ quote_counts|safe }};
+  var budgetLabels = {{ budget_labels|safe }};
+  var budgetCounts = {{ budget_counts|safe }};
+  var typeLabels   = {{ project_labels|safe }};
+  var typeCounts   = {{ project_counts|safe }};
+
+  var COLORS = ['#60a5fa','#a78bfa','#f472b6','#34d399','#fbbf24','#f87171','#38bdf8'];
+
+  // ── CRITICAL FIX: animation: false stops charts from "falling" on scroll ──
+  var BASE_OPTS = {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: false,   // <-- THIS is what was causing the fall-on-scroll bug
+    plugins: { legend: { display: false } },
+  };
+
+  // Line chart
+  var lineCtx = document.getElementById('lineChart');
+  if (lineCtx && quoteLabels.length) {
+    new Chart(lineCtx, {
+      type: 'line',
+      data: {
+        labels: quoteLabels,
+        datasets: [{
+          data: quoteCounts,
+          borderColor: '#60a5fa',
+          backgroundColor: 'rgba(96,165,250,0.10)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 4,
+          pointBackgroundColor: '#60a5fa',
+          borderWidth: 2,
+        }]
+      },
+      options: Object.assign({}, BASE_OPTS, {
+        scales: {
+          x: { grid: { color: 'rgba(148,163,184,0.1)' }, ticks: { color: '#475569', font: { size: 11 } } },
+          y: { grid: { color: 'rgba(148,163,184,0.1)' }, ticks: { color: '#475569', font: { size: 11 }, stepSize: 1 } },
+        }
+      })
+    });
+  }
+
+  // Budget bar chart
+  var budgetCtx = document.getElementById('budgetChart');
+  if (budgetCtx && budgetLabels.length) {
+    new Chart(budgetCtx, {
+      type: 'bar',
+      data: {
+        labels: budgetLabels,
+        datasets: [{
+          data: budgetCounts,
+          backgroundColor: COLORS,
+          borderRadius: 6,
+          maxBarThickness: 32,
+        }]
+      },
+      options: Object.assign({}, BASE_OPTS, {
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#475569', font: { size: 10 }, maxRotation: 30 } },
+          y: { grid: { color: 'rgba(148,163,184,0.1)' }, ticks: { color: '#475569', font: { size: 11 }, stepSize: 1 } },
+        }
+      })
+    });
+  }
+
+  // Project type doughnut
+  var typeCtx = document.getElementById('typeChart');
+  if (typeCtx && typeLabels.length) {
+    new Chart(typeCtx, {
+      type: 'doughnut',
+      data: {
+        labels: typeLabels,
+        datasets: [{
+          data: typeCounts,
+          backgroundColor: COLORS,
+          borderWidth: 0,
+          hoverOffset: 4,
+        }]
+      },
+      options: Object.assign({}, BASE_OPTS, {
+        cutout: '65%',
+        plugins: {
+          legend: {
+            display: true,
+            position: 'bottom',
+            labels: { color: '#475569', font: { size: 10 }, padding: 8, boxWidth: 10 }
+          }
+        }
+      })
+    });
+  }
+})();
+</script>
+{% endblock %}

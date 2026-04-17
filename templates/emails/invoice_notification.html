@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Invoice {{ invoice.invoice_number }}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#080c1a;font-family:'Segoe UI',Arial,sans-serif;color:#94a3b8;padding:2rem 1rem}
+    .card{max-width:560px;margin:0 auto;background:#0f1629;border-radius:16px;overflow:hidden;border:1px solid #1e2740}
+    .top{background:linear-gradient(135deg,hsl(225,80%,45%),hsl(263,70%,50%));padding:2rem 2.5rem}
+    .top h1{color:#fff;font-size:1.1rem;font-weight:700;margin-bottom:0.3rem}
+    .top p{color:rgba(255,255,255,0.7);font-size:0.82rem}
+    .body{padding:2rem 2.5rem}
+    .amount-box{background:#080c1a;border:1px solid rgba(99,102,241,0.25);border-radius:12px;padding:1.5rem;text-align:center;margin:1.25rem 0}
+    .amount-box .lbl{font-size:0.62rem;text-transform:uppercase;letter-spacing:0.12em;color:#475569;margin-bottom:0.5rem}
+    .amount-box .amount{font-size:2rem;font-weight:800;color:#e2e8f0;font-family:'Courier New',monospace}
+    .amount-box .sub{font-size:0.72rem;color:#475569;margin-top:0.3rem}
+    .row{display:flex;justify-content:space-between;padding:0.6rem 0;border-bottom:1px solid #1e2740;font-size:0.85rem}
+    .row:last-of-type{border-bottom:none}
+    .row span:first-child{color:#64748b}
+    .row span:last-child{color:#e2e8f0;font-weight:500}
+    .cta{margin:1.5rem 0;text-align:center}
+    .btn{display:inline-block;background:linear-gradient(135deg,hsl(225,80%,50%),hsl(263,70%,55%));color:#fff;font-size:0.85rem;font-weight:700;padding:0.8rem 2.25rem;border-radius:999px;text-decoration:none}
+    .eft-box{background:#080c1a;border:1px solid #1e2740;border-radius:10px;padding:1.25rem;margin-bottom:1.25rem}
+    .eft-box h4{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:#4ade80;margin-bottom:0.75rem}
+    .eft-row{display:flex;justify-content:space-between;font-size:0.82rem;padding:0.3rem 0}
+    .eft-row span:first-child{color:#475569}
+    .eft-row span:last-child{color:#e2e8f0;font-weight:500}
+    .foot{background:#080c1a;padding:1.25rem 2.5rem;border-top:1px solid #1e2740;text-align:center;font-size:0.72rem;color:#334155;line-height:1.9}
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="top">
+    <h1>🧾 Invoice {{ invoice.invoice_number }}</h1>
+    <p>{{ invoice.get_invoice_type_display }} · {{ project.title }}</p>
+  </div>
+  <div class="body">
+    <p style="font-size:0.875rem;line-height:1.75;margin-bottom:1rem">
+      Hi {{ quote.name|truncatewords:1 }}, please find your invoice below.
+      Payment is due by <strong style="color:#e2e8f0">{{ invoice.due_date|date:"d F Y" }}</strong>.
+    </p>
+
+    <div class="amount-box">
+      <div class="lbl">Amount Due</div>
+      <div class="amount">R {{ invoice.total_including_vat|floatformat:2 }}</div>
+      <div class="sub">Includes {{ invoice.vat_rate }}% VAT</div>
+    </div>
+
+    <div class="row"><span>Invoice</span><span>{{ invoice.invoice_number }}</span></div>
+    <div class="row"><span>Project</span><span>{{ project.title }}</span></div>
+    <div class="row"><span>Due Date</span><span>{{ invoice.due_date|date:"d F Y" }}</span></div>
+    <div class="row"><span>Subtotal (excl. VAT)</span><span>R {{ invoice.amount|floatformat:2 }}</span></div>
+    <div class="row"><span>VAT ({{ invoice.vat_rate }}%)</span><span>R {{ invoice.vat_amount|floatformat:2 }}</span></div>
+
+    <div class="eft-box" style="margin-top:1.25rem">
+      <h4>💳 EFT / Bank Transfer Details</h4>
+      <div class="eft-row"><span>Bank</span><span>{{ agency.bank.name }}</span></div>
+      <div class="eft-row"><span>Account</span><span>{{ agency.bank.account|default:"Contact us" }}</span></div>
+      <div class="eft-row"><span>Branch Code</span><span>{{ agency.bank.branch_code|default:"—" }}</span></div>
+      <div class="eft-row"><span>Reference</span><span style="font-family:'Courier New',monospace">{{ invoice.invoice_number }}</span></div>
+    </div>
+
+    <div class="cta">
+      <a href="{{ agency.website }}/invoice/{{ invoice.invoice_number }}/?token={{ token }}" class="btn">View Full Invoice →</a>
+    </div>
+
+    <p style="font-size:0.75rem;color:#334155;text-align:center;margin-top:0.75rem">
+      Questions? Reply to this email or WhatsApp {{ agency.phone }}
+    </p>
+  </div>
+  <div class="foot">
+    <strong style="color:#475569">{{ agency.name }}</strong><br>
+    {{ agency.email }} · {{ agency.phone }} · {{ agency.location }}
+  </div>
+</div>
+</body>
+</html>

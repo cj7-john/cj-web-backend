@@ -1,0 +1,178 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice {{ invoice.invoice_number }} — {{ agency.name }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: hsl(228,32%,7%); color: hsl(220,20%,74%); padding: 2rem 1rem; min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+
+    .invoice { max-width: 780px; margin: 0 auto; background: hsl(228,28%,9%); border: 1px solid hsl(228,18%,20%); border-radius: 1.25rem; overflow: hidden; }
+
+    .invoice__header { background: linear-gradient(135deg,hsl(225,80%,56%),hsl(263,70%,60%)); padding: 2.5rem; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem; }
+    .invoice__agency-name { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
+    .invoice__agency-meta { font-size: 0.8rem; color: rgba(255,255,255,0.7); line-height: 1.8; margin-top: 0.4rem; }
+    .invoice__number-block { text-align: right; }
+    .inv-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.6); margin-bottom: 0.25rem; }
+    .inv-num { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 500; color: #fff; }
+    .inv-pill { display: inline-block; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); border-radius: 999px; padding: 0.2rem 0.9rem; font-size: 0.75rem; color: #fff; margin-top: 0.5rem; font-weight: 600; }
+
+    .invoice__body { padding: 2.5rem; }
+
+    .invoice__meta { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2.5rem; padding-bottom: 2rem; border-bottom: 1px solid hsl(228,18%,20%); }
+    .meta-group h3 { font-family: 'Syne', sans-serif; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: hsl(220,15%,50%); margin-bottom: 0.6rem; }
+    .meta-group p { font-size: 0.875rem; color: hsl(0,0%,100%); line-height: 1.7; font-weight: 500; }
+    .meta-group .muted { color: hsl(220,20%,74%); font-weight: 400; }
+
+    .invoice__table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; }
+    .invoice__table th { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: hsl(220,15%,50%); padding: 0.6rem 1rem; text-align: left; border-bottom: 1px solid hsl(228,18%,20%); }
+    .invoice__table th:last-child { text-align: right; }
+    .invoice__table td { padding: 1rem; font-size: 0.875rem; border-bottom: 1px solid hsl(228,18%,16%); vertical-align: top; }
+    .invoice__table td:last-child { text-align: right; font-family: 'JetBrains Mono', monospace; }
+    .invoice__table tr:last-child td { border-bottom: none; }
+
+    .invoice__totals { display: flex; justify-content: flex-end; margin-bottom: 2.5rem; }
+    .totals-inner { min-width: 280px; }
+    .totals-row { display: flex; justify-content: space-between; padding: 0.5rem 0; font-size: 0.875rem; border-bottom: 1px solid hsl(228,18%,18%); }
+    .totals-row:last-child { border-bottom: none; padding-top: 0.75rem; font-size: 1rem; font-weight: 700; color: hsl(0,0%,100%); }
+    .totals-row span:last-child { font-family: 'JetBrains Mono', monospace; }
+    .gradient-text { background: linear-gradient(135deg,hsl(220,90%,72%),hsl(263,65%,72%)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    .invoice__payment { background: hsla(228,30%,18%,0.5); border: 1px solid hsl(228,18%,22%); border-radius: 0.875rem; padding: 1.5rem; margin-bottom: 2rem; }
+    .invoice__payment h3 { font-family: 'Syne', sans-serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: hsl(225,80%,72%); margin-bottom: 1rem; }
+    .payment-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 1rem; }
+    .payment-item span:first-child { display: block; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: hsl(220,15%,50%); margin-bottom: 0.2rem; }
+    .payment-item span:last-child { font-size: 0.875rem; color: hsl(0,0%,100%); font-weight: 500; }
+
+    .invoice__footer { border-top: 1px solid hsl(228,18%,20%); padding: 1.5rem 2.5rem; text-align: center; font-size: 0.8rem; color: hsl(220,15%,50%); line-height: 1.8; }
+
+    .print-bar { max-width: 780px; margin: 0 auto 1rem; display: flex; justify-content: flex-end; gap: 0.75rem; }
+    .print-btn { background: linear-gradient(135deg,hsl(225,80%,56%),hsl(263,70%,60%)); color: #fff; border: none; border-radius: 999px; padding: 0.6rem 1.5rem; font-family: 'Syne',sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer; }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .invoice { border: none; border-radius: 0; max-width: 100%; }
+      .print-bar { display: none; }
+    }
+    @media (max-width: 600px) {
+      .invoice__header { flex-direction: column; }
+      .invoice__number-block { text-align: left; }
+      .invoice__meta { grid-template-columns: 1fr; }
+      .invoice__body { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="print-bar">
+    <button class="print-btn" onclick="window.print()">🖨️ Print / Save PDF</button>
+  </div>
+
+  <div class="invoice">
+    <div class="invoice__header">
+      <div>
+        <div class="invoice__agency-name">{{ agency.name }}</div>
+        <div class="invoice__agency-meta">
+          {{ agency.location }}<br>
+          {{ agency.email }}<br>
+          {{ agency.phone }}
+          {% if agency.vat_no %}<br>VAT: {{ agency.vat_no }}{% endif %}
+        </div>
+      </div>
+      <div class="invoice__number-block">
+        <div class="inv-label">Invoice Number</div>
+        <div class="inv-num">{{ invoice.invoice_number }}</div>
+        <div><span class="inv-pill">{{ invoice.get_invoice_type_display }}</span></div>
+        <div style="margin-top:0.5rem;font-size:0.8rem;font-weight:700;color:{% if invoice.status == 'paid' %}hsl(155,70%,55%){% elif invoice.status == 'overdue' %}hsl(0,70%,65%){% else %}hsl(225,80%,72%){% endif %}">
+          {{ invoice.get_status_display }}
+        </div>
+      </div>
+    </div>
+
+    <div class="invoice__body">
+      <div class="invoice__meta">
+        <div class="meta-group">
+          <h3>Bill To</h3>
+          <p>{{ quote.name }}</p>
+          {% if quote.business_name %}<p class="muted">{{ quote.business_name }}</p>{% endif %}
+          <p class="muted">{{ quote.email }}</p>
+          {% if quote.phone %}<p class="muted">{{ quote.phone }}</p>{% endif %}
+        </div>
+        <div class="meta-group">
+          <h3>Invoice Details</h3>
+          <p>Issued: <span class="muted">{{ invoice.issued_date|date:"d F Y" }}</span></p>
+          <p>Due: <span class="muted">{{ invoice.due_date|date:"d F Y" }}</span></p>
+          {% if invoice.paid_date %}<p>Paid: <span style="color:hsl(155,70%,55%)">{{ invoice.paid_date|date:"d F Y" }}</span></p>{% endif %}
+          <p>Ref: <span class="muted" style="font-family:'JetBrains Mono',monospace">{{ quote.reference }}</span></p>
+        </div>
+      </div>
+
+      <table class="invoice__table">
+        <thead>
+          <tr>
+            <th style="width:55%">Description</th>
+            <th>Type</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <strong style="color:hsl(0,0%,100%)">{{ project.title }}</strong><br>
+              <span style="font-size:0.8rem;color:hsl(220,15%,50%)">{{ invoice.get_invoice_type_display }}</span>
+              {% if invoice.notes %}<br><span style="font-size:0.8rem;color:hsl(220,15%,50%)">{{ invoice.notes }}</span>{% endif %}
+            </td>
+            <td style="color:hsl(220,20%,74%)">{{ quote.get_project_type_display }}</td>
+            <td>R {{ invoice.amount|floatformat:2 }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="invoice__totals">
+        <div class="totals-inner">
+          <div class="totals-row"><span>Subtotal</span><span>R {{ invoice.amount|floatformat:2 }}</span></div>
+          <div class="totals-row"><span>VAT ({{ invoice.vat_rate }}%)</span><span>R {{ invoice.vat_amount|floatformat:2 }}</span></div>
+          <div class="totals-row"><span class="gradient-text">Total Due</span><span>R {{ invoice.total_including_vat|floatformat:2 }}</span></div>
+        </div>
+      </div>
+
+      <div class="invoice__payment">
+        <h3>💳 EFT / Bank Transfer Details</h3>
+        <div class="payment-grid">
+          <div class="payment-item">
+            <span>Bank</span>
+            <span>{{ agency.bank.name }}</span>
+          </div>
+          <div class="payment-item">
+            <span>Account Number</span>
+            <span>{{ agency.bank.account|default:"— contact us" }}</span>
+          </div>
+          <div class="payment-item">
+            <span>Branch Code</span>
+            <span>{{ agency.bank.branch_code|default:"—" }}</span>
+          </div>
+          <div class="payment-item">
+            <span>Payment Reference</span>
+            <span style="font-family:'JetBrains Mono',monospace">{{ invoice.invoice_number }}</span>
+          </div>
+        </div>
+      </div>
+
+      <p style="font-size:0.8rem;color:hsl(220,15%,50%);text-align:center">
+        Questions? Reply to {{ agency.email }} or WhatsApp {{ agency.phone }}
+      </p>
+    </div>
+
+    <div class="invoice__footer">
+      Thank you for choosing <strong style="color:hsl(0,0%,100%)">{{ agency.name }}</strong> 🙏<br>
+      {{ agency.email }} · {{ agency.phone }} · {{ agency.location }}
+    </div>
+  </div>
+
+</body>
+</html>
