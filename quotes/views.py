@@ -1,21 +1,12 @@
-"""
-quotes/views.py
-================
-Fixed issues:
-- Form blink/not saving: was missing proper error handling + redirect
-- Email not sending: added detailed error logging
-- Success page redirect: now uses session to pass reference
-"""
-
 import logging
-from django.shortcuts     import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_http_methods
-from django.http          import HttpResponse
-from django.conf          import settings
+from django.http import HttpResponse, JsonResponse
+from django.conf import settings
 from django.template.loader import render_to_string
-from django.utils         import timezone
+from django.utils import timezone
 
-from .forms  import QuoteRequestForm
+from .forms import QuoteRequestForm
 from .models import QuoteRequest, Invoice, Project
 from .emails import send_admin_notification, send_client_confirmation
 
@@ -28,10 +19,7 @@ def quote_request(request):
     """
     GET  → Render the empty quote form.
     POST → Validate, save to DB, send emails, redirect to success page.
-
-    The "page blink" happened because the form was being submitted to
-    the static HTML file's action URL (a different server), not Django.
-    Fix: make sure the form action points to http://127.0.0.1:8000/
+    If called via fetch() (AJAX), return JSON instead of redirect.
     """
     if request.method == 'POST':
         form = QuoteRequestForm(request.POST)
@@ -46,7 +34,6 @@ def quote_request(request):
                 send_admin_notification(quote)
                 logger.info(f'Admin notification sent for {quote.reference}')
             except Exception as exc:
-                # Don't crash the page — log and continue
                 logger.error(f'Admin email failed for {quote.reference}: {exc}')
 
             # 3. Send client auto-reply email
@@ -56,16 +43,29 @@ def quote_request(request):
             except Exception as exc:
                 logger.error(f'Client email failed for {quote.reference}: {exc}')
 
-            # 4. Store reference in session so success page can show it
-            request.session['submitted_ref'] = quote.reference
+            # 4. AJAX branch — return JSON if request came from fetch()
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'status': 'ok',
+                    'message': f"Thanks! We've received your brief ({quote.reference}) and will reply within 24 hours.",
+                    'reference': quote.reference,
+                })
 
-            # 5. PRG pattern — redirect prevents double submission on refresh
+            # 5. Standard Django form submission — redirect to success page
+            request.session['submitted_ref'] = quote.reference
             return redirect('quote_success')
 
         else:
-            # Form has errors — log them for debugging
             logger.warning(f'Form validation failed: {form.errors.as_json()}')
-            # Fall through to re-render with errors shown inline
+
+            # AJAX branch — return JSON errors
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                errors = {field: errs[0] for field, errs in form.errors.items()}
+                return JsonResponse({
+                    'status': 'error',
+                    'error': 'Please check your details.',
+                    'fields': errors
+                }, status=400)
 
     else:
         form = QuoteRequestForm()
@@ -83,7 +83,6 @@ def quote_success(request):
     reference = request.session.pop('submitted_ref', None)
 
     if not reference:
-        # No session key = direct navigation, not a real submission
         return redirect('quote_request')
 
     return render(request, 'quotes/success.html', {
