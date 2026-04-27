@@ -1,6 +1,15 @@
+<<<<<<< HEAD
 import logging
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_http_methods
+=======
+# quotes/views.py
+import logging
+import hashlib
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+>>>>>>> 539ba8b482b0962d8148eeb5e343e041ae287d1f
 from django.http import HttpResponse, JsonResponse
 from django.conf import settings
 from django.template.loader import render_to_string
@@ -14,13 +23,26 @@ logger = logging.getLogger('quotes')
 
 
 # ─── QUOTE REQUEST FORM ───────────────────────────────────────────────────────
-@require_http_methods(["GET", "POST"])
+@csrf_exempt
+@require_http_methods(["GET", "POST", "OPTIONS"])
 def quote_request(request):
+<<<<<<< HEAD
     """
     GET  → Render the empty quote form.
     POST → Validate, save to DB, send emails, redirect to success page.
     If called via fetch() (AJAX), return JSON instead of redirect.
     """
+=======
+    # Handle OPTIONS preflight for CORS
+    if request.method == "OPTIONS":
+        response = HttpResponse()
+        response['Access-Control-Allow-Origin'] = 'https://cj-web-design-studio.netlify.app'
+        response['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS'
+        response['Access-Control-Allow-Headers'] = 'Content-Type, X-CSRFToken, X-Requested-With'
+        response['Access-Control-Max-Age'] = '86400'
+        return response
+
+>>>>>>> 539ba8b482b0962d8148eeb5e343e041ae287d1f
     if request.method == 'POST':
         form = QuoteRequestForm(request.POST)
 
@@ -51,12 +73,17 @@ def quote_request(request):
                     'reference': quote.reference,
                 })
 
+<<<<<<< HEAD
             # 5. Standard Django form submission — redirect to success page
             request.session['submitted_ref'] = quote.reference
+=======
+            # 5. Redirect to success page
+>>>>>>> 539ba8b482b0962d8148eeb5e343e041ae287d1f
             return redirect('quote_success')
 
         else:
             logger.warning(f'Form validation failed: {form.errors.as_json()}')
+<<<<<<< HEAD
 
             # AJAX branch — return JSON errors
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -66,6 +93,8 @@ def quote_request(request):
                     'error': 'Please check your details.',
                     'fields': errors
                 }, status=400)
+=======
+>>>>>>> 539ba8b482b0962d8148eeb5e343e041ae287d1f
 
     else:
         form = QuoteRequestForm()
@@ -75,29 +104,15 @@ def quote_request(request):
 
 # ─── SUCCESS PAGE ─────────────────────────────────────────────────────────────
 def quote_success(request):
-    """
-    Shown after a successful form submission.
-    Reads the reference from the session (one-time, then clears it).
-    If someone navigates here directly without submitting, redirect them.
-    """
     reference = request.session.pop('submitted_ref', None)
-
     if not reference:
         return redirect('quote_request')
-
-    return render(request, 'quotes/success.html', {
-        'reference': reference,
-    })
+    return render(request, 'quotes/success.html', {'reference': reference})
 
 
 # ─── INVOICE VIEW ─────────────────────────────────────────────────────────────
 def invoice_view(request, invoice_number):
-    """
-    Client-facing invoice page.
-    Protected by a simple token — staff can always access it.
-    """
     invoice = get_object_or_404(Invoice, invoice_number=invoice_number)
-
     token = request.GET.get('token', '')
     expected = _make_token(invoice)
 
@@ -107,11 +122,10 @@ def invoice_view(request, invoice_number):
     context = {
         'invoice': invoice,
         'project': invoice.project,
-        'quote':   invoice.project.quote,
-        'token':   expected,
+        'quote': invoice.project.quote,
+        'token': expected,
     }
 
-    # PDF download via ?pdf=1
     if request.GET.get('pdf') == '1':
         try:
             from weasyprint import HTML, CSS
@@ -132,7 +146,5 @@ def invoice_view(request, invoice_number):
 
 
 def _make_token(invoice):
-    """Simple deterministic token for invoice URL sharing."""
-    import hashlib
     raw = f'{invoice.invoice_number}{settings.SECRET_KEY[:12]}'
     return hashlib.sha256(raw.encode()).hexdigest()[:12]
